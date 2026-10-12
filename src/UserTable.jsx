@@ -45,7 +45,7 @@ export default function UserTable({ users, sortKey, sortDir, onSort, onEdit, onD
             <td data-label="Email">{user.email}</td>
             <td data-label="Department">{user.department}</td>
             <td data-label="Actions" className="actions-cell">
-              <button type="button" className="btn btn-small" onClick={() => onEdit(user)}>
+              <button type="button" className="btn btn-primary btn-small" onClick={() => onEdit(user)}>
                 Edit
               </button>
               <button type="button" className="btn btn-small btn-danger" onClick={() => onDelete(user)}>
