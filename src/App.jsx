@@ -55,13 +55,11 @@ export default function App() {
   }, []);
 
   const [search, setSearch] = useState("");
-
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [filterDraft, setFilterDraft] = useState(EMPTY_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
   const filterBoxRef = useRef(null);
 
-  // close the filter popup if you click anywhere else on the page
   useEffect(() => {
     function handleOutsideClick(e) {
       if (filterBoxRef.current && !filterBoxRef.current.contains(e.target)) {
@@ -114,9 +112,6 @@ export default function App() {
     }
   }
 
-  // this runs the search box, the filter popup, and the sort together.
-  // has to happen before pagination or the search would only look at
-  // whatever page you're already on
   const filteredAndSorted = useMemo(() => {
     let result = users;
     const searchText = search.trim().toLowerCase();
@@ -168,14 +163,12 @@ export default function App() {
 
   const totalPages = Math.max(1, Math.ceil(filteredAndSorted.length / pageSize));
   const currentPage = page > totalPages ? totalPages : page;
-
   const pageStart = (currentPage - 1) * pageSize;
   const currentPageUsers = filteredAndSorted.slice(pageStart, pageStart + pageSize);
-
   const firstItemNumber = filteredAndSorted.length === 0 ? 0 : pageStart + 1;
   const lastItemNumber = Math.min(currentPage * pageSize, filteredAndSorted.length);
 
-  const [formUser, setFormUser] = useState(null); // null = modal closed, {} = adding, {...} = editing
+  const [formUser, setFormUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
   async function handleSave(values) {
@@ -240,166 +233,156 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>User Management Dashboard</h1>
-        <div>
-          <h2> Hello Ms. Monica Chadalavadas </h2>
+    <div className="app-shell">
+      <header className="topbar">
+        <a className="brand" href="#top" aria-label="PeopleDesk home">
+          <span className="brand-mark" aria-hidden="true">P</span>
+          <span>people<span className="brand-accent">desk</span></span>
+        </a>
+        <div className="topbar-right">
+          <span className="workspace-label"><span className="status-dot" /> Workspace</span>
+          <div className="profile-chip">
+            <span className="profile-avatar">MC</span>
+            <span className="profile-name">Monica Chadalavadas</span>
+            <span className="profile-chevron" aria-hidden="true">⌄</span>
+          </div>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setFormUser({})}>
-          + Add User
-        </button>
       </header>
 
-      <div className="toolbar">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by name, email, or department..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search users"
-          />
-          {search && (
-            <button type="button" className="search-clear" onClick={() => setSearch("")} aria-label="Clear search">
-              ×
-            </button>
-          )}
-        </div>
-
-        <div className="filter-popup-wrapper" ref={filterBoxRef}>
-          <button type="button" className="btn btn-secondary" onClick={openFilters}>
-            Filter {activeFilterCount > 0 && <span className="filter-badge">{activeFilterCount}</span>}
+      <main className="app">
+        <section className="welcome-row">
+          <div>
+            <p className="eyebrow">PEOPLE OPERATIONS <span> / </span> OVERVIEW</p>
+            <h1>Your people, <span>in one place.</span></h1>
+            <p className="welcome-copy">A clear view of your team and the details that keep things moving.</p>
+          </div>
+          <button type="button" className="btn btn-primary add-user-button" onClick={() => setFormUser({})}>
+            <span className="button-plus" aria-hidden="true">+</span> Add a user
           </button>
+        </section>
 
-          {filterOpen && (
-            <div className="filter-popup">
-              <div className="filter-field">
-                <label>First Name</label>
-                <input
-                  value={filterDraft.firstName}
-                  onChange={(e) => setFilterDraft({ ...filterDraft, firstName: e.target.value })}
-                  placeholder="e.g. Alex"
-                />
-              </div>
-              <div className="filter-field">
-                <label>Last Name</label>
-                <input
-                  value={filterDraft.lastName}
-                  onChange={(e) => setFilterDraft({ ...filterDraft, lastName: e.target.value })}
-                  placeholder="e.g. Sharma"
-                />
-              </div>
-              <div className="filter-field">
-                <label>Email</label>
-                <input
-                  value={filterDraft.email}
-                  onChange={(e) => setFilterDraft({ ...filterDraft, email: e.target.value })}
-                  placeholder="e.g. gmail.com"
-                />
-              </div>
-              <div className="filter-field">
-                <label>Department</label>
-                <select
-                  value={filterDraft.department}
-                  onChange={(e) => setFilterDraft({ ...filterDraft, department: e.target.value })}
-                >
-                  <option value="">All departments</option>
-                  {departmentList.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="filter-actions">
-                <button type="button" className="btn btn-text" onClick={clearFilters}>Clear</button>
-                <button type="button" className="btn btn-primary" onClick={applyFilters}>Apply</button>
-              </div>
+        <section className="stats-grid" aria-label="User directory summary">
+          <article className="stat-card stat-card-primary">
+            <div className="stat-icon" aria-hidden="true">♙</div>
+            <p className="stat-label">People in directory</p>
+            <div className="stat-value-row"><strong>{loading ? "—" : users.length}</strong><span className="stat-trend">team members</span></div>
+            <span className="stat-footnote">Across your organization</span>
+          </article>
+          <article className="stat-card">
+            <div className="stat-icon stat-icon-lavender" aria-hidden="true">▦</div>
+            <p className="stat-label">Departments</p>
+            <div className="stat-value-row"><strong>{loading ? "—" : departmentList.length}</strong><span className="stat-trend">represented</span></div>
+            <span className="stat-footnote">Teams in your workspace</span>
+          </article>
+          <article className="stat-card">
+            <div className="stat-icon stat-icon-mint" aria-hidden="true">⌕</div>
+            <p className="stat-label">Current view</p>
+            <div className="stat-value-row"><strong>{loading ? "—" : filteredAndSorted.length}</strong><span className="stat-trend">people</span></div>
+            <span className="stat-footnote">Matching your search and filters</span>
+          </article>
+        </section>
+
+        {actionError && (
+          <div className="banner banner-error" role="alert">
+            {actionError}
+            <button type="button" onClick={() => setActionError(null)} aria-label="Dismiss error">×</button>
+          </div>
+        )}
+
+        <section className="directory-card">
+          <div className="directory-heading">
+            <div>
+              <div className="directory-title-row"><h2>Team directory</h2><span className="directory-count">{loading ? "Loading" : `${filteredAndSorted.length} members`}</span></div>
+              <p>Manage your people and keep their details up to date.</p>
             </div>
-          )}
-        </div>
-      </div>
+            <span className="directory-kicker"><span className="status-dot" /> All systems operational</span>
+          </div>
 
-      {actionError && (
-        <div className="banner banner-error">
-          {actionError}
-          <button type="button" onClick={() => setActionError(null)}>×</button>
-        </div>
-      )}
-
-      {loading && <div className="loading-state">Loading users…</div>}
-
-      {!loading && loadError && (
-        <div className="banner banner-error">Failed to load users: {loadError}</div>
-      )}
-
-      {!loading && !loadError && (
-        <>
-          <UserTable
-            users={currentPageUsers}
-            sortKey={sortKey}
-            sortDir={sortDir}
-            onSort={handleSort}
-            onEdit={setFormUser}
-            onDelete={setDeleteTarget}
-          />
-
-          <div className="pagination">
-            <div className="pagination-info">
-              Showing {firstItemNumber}-{lastItemNumber} of {filteredAndSorted.length}
+          <div className="toolbar">
+            <div className="search-bar">
+              <span className="search-icon" aria-hidden="true">⌕</span>
+              <input
+                type="text"
+                placeholder="Search people, email, department..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search users"
+              />
+              {search && (
+                <button type="button" className="search-clear" onClick={() => setSearch("")} aria-label="Clear search">×</button>
+              )}
             </div>
-            <div className="pagination-controls">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setPage(currentPage - 1)}
-                disabled={currentPage <= 1}
-              >
-                Prev
+
+            <div className="filter-popup-wrapper" ref={filterBoxRef}>
+              <button type="button" className="btn btn-secondary filter-button" onClick={filterOpen ? () => setFilterOpen(false) : openFilters} aria-expanded={filterOpen}>
+                <span aria-hidden="true">☷</span> Filters {activeFilterCount > 0 && <span className="filter-badge">{activeFilterCount}</span>}
               </button>
-              <span className="pagination-page">Page {currentPage} of {totalPages}</span>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setPage(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-              >
-                Next
-              </button>
-            </div>
-            <div className="pagination-size">
-              <label htmlFor="pageSize">Rows per page</label>
-              <select
-                id="pageSize"
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-              >
-                {PAGE_SIZE_OPTIONS.map((size) => (
-                  <option key={size} value={size}>{size}</option>
-                ))}
-              </select>
+
+              {filterOpen && (
+                <div className="filter-popup">
+                  <div className="filter-popup-title"><strong>Filter people</strong><span>Refine your directory</span></div>
+                  <div className="filter-field">
+                    <label htmlFor="filter-first-name">First name</label>
+                    <input id="filter-first-name" value={filterDraft.firstName} onChange={(e) => setFilterDraft({ ...filterDraft, firstName: e.target.value })} placeholder="e.g. Alex" />
+                  </div>
+                  <div className="filter-field">
+                    <label htmlFor="filter-last-name">Last name</label>
+                    <input id="filter-last-name" value={filterDraft.lastName} onChange={(e) => setFilterDraft({ ...filterDraft, lastName: e.target.value })} placeholder="e.g. Sharma" />
+                  </div>
+                  <div className="filter-field">
+                    <label htmlFor="filter-email">Email</label>
+                    <input id="filter-email" value={filterDraft.email} onChange={(e) => setFilterDraft({ ...filterDraft, email: e.target.value })} placeholder="e.g. gmail.com" />
+                  </div>
+                  <div className="filter-field">
+                    <label htmlFor="filter-department">Department</label>
+                    <select id="filter-department" value={filterDraft.department} onChange={(e) => setFilterDraft({ ...filterDraft, department: e.target.value })}>
+                      <option value="">All departments</option>
+                      {departmentList.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div className="filter-actions">
+                    <button type="button" className="btn btn-text" onClick={clearFilters}>Clear all</button>
+                    <button type="button" className="btn btn-primary" onClick={applyFilters}>Apply filters</button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </>
-      )}
+
+          {loading && <div className="loading-state"><span className="loading-spinner" /> Loading your directory…</div>}
+          {!loading && loadError && <div className="banner banner-error">Could not load users: {loadError}</div>}
+
+          {!loading && !loadError && (
+            <>
+              <div className="table-scroll">
+                <UserTable users={currentPageUsers} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} onEdit={setFormUser} onDelete={setDeleteTarget} />
+              </div>
+              <div className="pagination">
+                <div className="pagination-info">Showing <strong>{firstItemNumber}–{lastItemNumber}</strong> of <strong>{filteredAndSorted.length}</strong> people</div>
+                <div className="pagination-controls">
+                  <button type="button" className="btn btn-secondary page-button" onClick={() => setPage(currentPage - 1)} disabled={currentPage <= 1} aria-label="Previous page">←</button>
+                  <span className="pagination-page"><strong>{currentPage}</strong> <span>of</span> {totalPages}</span>
+                  <button type="button" className="btn btn-secondary page-button" onClick={() => setPage(currentPage + 1)} disabled={currentPage >= totalPages} aria-label="Next page">→</button>
+                </div>
+                <div className="pagination-size">
+                  <label htmlFor="pageSize">Rows</label>
+                  <select id="pageSize" value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+                    {PAGE_SIZE_OPTIONS.map((size) => <option key={size} value={size}>{size}</option>)}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+
+        <footer className="app-footer"><span>© 2026 PeopleDesk</span><span>Made for teams that care about people.</span></footer>
+      </main>
 
       {formUser !== null && (
-        <UserModal
-          mode="form"
-          user={formUser.id ? formUser : null}
-          onSubmit={handleSave}
-          onCancel={() => setFormUser(null)}
-          busy={isSaving}
-        />
+        <UserModal mode="form" user={formUser.id ? formUser : null} onSubmit={handleSave} onCancel={() => setFormUser(null)} busy={isSaving} />
       )}
-
       {deleteTarget && (
-        <UserModal
-          mode="delete"
-          user={deleteTarget}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
-          busy={isDeleting}
-        />
+        <UserModal mode="delete" user={deleteTarget} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} busy={isDeleting} />
       )}
     </div>
   );
